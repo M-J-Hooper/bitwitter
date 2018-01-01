@@ -33,7 +33,29 @@ def iso_from_timestamp(timestamp):
 def get_interval_beginning(timestamp, interval):
     return int(math.floor(int(timestamp) / float(interval))) * interval
 
-def frange(x, y, jump):
-    while x < y:
-        yield float(x)
-        x += decimal.Decimal(str(jump))
+def param_range(param_name, min_params, max_params, param_intervals):
+    x = min_params[param_name]
+    y = max_params[param_name]
+    jump = (y - x) / (param_intervals - 1)
+    
+    is_int = isinstance(x, int)
+    if is_int:
+        jump = int(jump)
+    else:
+        x = decimal.Decimal(str(x))
+
+    while x <= y:
+        if is_int:
+            yield x
+            x += jump
+        else:
+            yield float(x)
+            x += decimal.Decimal(str(jump))
+
+
+
+
+
+
+
+
