@@ -41,6 +41,8 @@ def get_prices(bulk):
         response = None
         price_data = prices.find_one({"timestamp": str(timestamp)})
         if price_data == None:
+            print("Found missing price at "+str(timestamp))
+            
             if skipped > 0:
                 print("Skipped "+str(skipped)+" existing prices")
                 skipped = 0
@@ -48,6 +50,7 @@ def get_prices(bulk):
             request_timestamps.append(timestamp)
             if len(request_timestamps) == limit:
                 response = make_request(request_timestamps[0], request_timestamps[-1])
+                print(response)
 
         else:
             if bulk and skipped == 0 and len(request_timestamps) > 0:
@@ -55,12 +58,17 @@ def get_prices(bulk):
             skipped += 1
         
         if response != None:
-            for i in range(len(request_timestamps)):
-                store = {"timestamp": str(request_timestamps[i]), "price": float(response[i][4])}
-                prices.insert(store)
-                print(store)
-            
-            request_timestamps = []
+            try:
+                for i in range(len(request_timestamps)):
+                    store = {"timestamp": str(request_timestamps[i]), "price": float(response[i][4])}
+                    prices.insert(store)
+                    print(store)
+            except Exception as e:
+                print("Bad response for "+str(request_timestamps))
+                print(e)
+            finally:
+                request_timestamps = []
 
-get_prices(False) #Bulk is broken, returned is out of order
+
+get_prices(False) #Bulk is broken, response is out of order
 

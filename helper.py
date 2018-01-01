@@ -1,6 +1,7 @@
 import json
 import math
 import tweepy
+import decimal
 from pymongo import MongoClient
 from datetime import datetime
 
@@ -32,3 +33,7 @@ def iso_from_timestamp(timestamp):
 def get_interval_beginning(timestamp, interval):
     return int(math.floor(int(timestamp) / float(interval))) * interval
 
+def frange(x, y, jump):
+    while x < y:
+        yield float(x)
+        x += decimal.Decimal(str(jump))
