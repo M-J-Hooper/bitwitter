@@ -15,7 +15,7 @@ class WebsocketClient(gdax.WebsocketClient):
     def on_message(self, msg):
         try:
             if "type" in msg and msg["type"] == "match":
-                timestamp = int(float(dp.parse(msg["time"]).strftime("%s.%f")) * 1000)
+                timestamp =  helper.timestamp_from_datetime(dp.parse(msg["time"]))
                 price = float(msg["price"])
                 print("Time "+str(timestamp)+", Price "+str(price))
 

@@ -32,6 +32,10 @@ listener = StreamListener(api=tweepy.API(wait_on_rate_limit=True))
 streamer = tweepy.Stream(auth=auth, listener=listener)
 
 conf = helper.get_config()
-print("Focus " + str(conf["words"]))
-streamer.filter(track=conf["words"], languages=["en"])
-print("Stopped")
+while(True):
+    try:
+        print("Focus " + str(conf["words"]))
+        streamer.filter(track=conf["words"], languages=["en"])
+    except Exception as e:
+        print(e)
+        print("Restarting")

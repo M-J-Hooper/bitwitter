@@ -30,6 +30,9 @@ def iso_from_timestamp(timestamp):
     ms = str(timestamp)[-3:] + "000Z"
     return datetime.fromtimestamp(timestamp / 1000.0).strftime('%Y-%m-%dT%H:%M:%S.') + ms
 
+def timestamp_from_datetime(dt):
+    return int(float(dt.strftime("%s.%f")) * 1000)
+
 def get_interval_beginning(timestamp, interval):
     return int(math.floor(int(timestamp) / float(interval))) * interval
 
@@ -43,14 +46,17 @@ def param_range(param_name, min_params, max_params, param_intervals):
         jump = int(jump)
     else:
         x = decimal.Decimal(str(x))
-
-    while x <= y:
-        if is_int:
-            yield x
-            x += jump
-        else:
-            yield float(x)
-            x += decimal.Decimal(str(jump))
+    
+    if jump == 0:
+        yield x
+    else:
+        while x <= y:
+            if is_int:
+                yield x
+                x += jump
+            else:
+                yield float(x)
+                x += decimal.Decimal(str(jump))
 
 
 
