@@ -4,9 +4,10 @@ import tweepy
 import decimal
 from pymongo import MongoClient
 from datetime import datetime
+import pickle
 
 def get_config():
-    with open('conf.json') as conf_json:
+    with open("conf.json") as conf_json:
         conf = json.load(conf_json)
     return conf
 
@@ -24,11 +25,11 @@ def get_twitter_auth():
     return auth
 
 def str_from_timestamp(timestamp):
-    return datetime.fromtimestamp(timestamp / 1000.0).strftime('%Y-%m-%d %H:%M:%S')
+    return datetime.fromtimestamp(timestamp / 1000.0).strftime("%Y-%m-%d %H:%M:%S")
 
 def iso_from_timestamp(timestamp):
     ms = str(timestamp)[-3:] + "000Z"
-    return datetime.fromtimestamp(timestamp / 1000.0).strftime('%Y-%m-%dT%H:%M:%S.') + ms
+    return datetime.fromtimestamp(timestamp / 1000.0).strftime("%Y-%m-%dT%H:%M:%S.") + ms
 
 def timestamp_from_datetime(dt):
     return int(float(dt.strftime("%s.%f")) * 1000)
@@ -58,6 +59,13 @@ def param_range(param_name, min_params, max_params, param_intervals):
                 yield float(x)
                 x += decimal.Decimal(str(jump))
 
+def save_data(obj, name):
+    with open(name + ".pkl", "wb") as f:
+        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
+
+def load_data(name):
+    with open(name + ".pkl", "rb") as f:
+        return pickle.load(f)
 
 
 

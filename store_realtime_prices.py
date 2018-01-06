@@ -17,7 +17,7 @@ class WebsocketClient(gdax.WebsocketClient):
             if "type" in msg and msg["type"] == "match":
                 timestamp =  helper.timestamp_from_datetime(dp.parse(msg["time"]))
                 price = float(msg["price"])
-                print("Time "+str(timestamp)+", Price "+str(price))
+                print(helper.str_from_timestamp(timestamp), ": Price", price)
 
                 new_interval_beginning = int(math.floor(timestamp / float(self.interval))) * self.interval
                 diff_interval = new_interval_beginning > self.interval_beginning
