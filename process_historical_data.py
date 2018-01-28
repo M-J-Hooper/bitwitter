@@ -39,7 +39,8 @@ def process(interval, window, min_data_points, include_links):
     stdev = np.std(window_sentiments)
     return average, stdev, window_sentiments, window_closing_timestamps
 
-def trade(average, stdev, window_sentiments, window_closing_timestamps, stdevs, starting_coins):
+def trade(average, stdev, window_sentiments, window_closing_timestamps, starting_coins, buy_stdevs, sell_stdevs=None):
+    sell_stdevs = -buy_stdevs if sell_stdevs == None else sell_stdevs
     buying = False
     money = 0.0
     coins = starting_coins * 1.0
@@ -53,88 +54,93 @@ def trade(average, stdev, window_sentiments, window_closing_timestamps, stdevs, 
         if price_data != None:
             price = price_data["price"]
             if buying:
-                if sentiment > average + stdevs * stdev:
+                if sentiment > average + buy_stdevs * stdev:
                     buying = False
                     coins = money * fee / price
                     trades += 1
             
             if not buying:
-                if sentiment < average - stdevs * stdev:
+                if sentiment < average + sell_stdevs * stdev:
                     buying = True
                     money = coins * fee * price
                     trades += 1
 
     change = (coins - starting_coins) * 100 / starting_coins
     return {"change": change, "trades": trades}
-minute = 1000 * 60
-hour = 60 * minute
 
-param_intervals = 5
-min_params = {"window": 5*minute, "stdevs": 0.5}#, "delay": 0}
-max_params = {"window": 45*minute, "stdevs": 3.5}#, "delay": 20*minute}
 
-attempts = [0,0]
-attempt_batch = 0
-while len(attempts) > 1:
-    attempts = []
-    attempt_batch += 1
-    print("\nAttempt batch "+str(attempt_batch)+" from "+str(min_params)+" to "+str(max_params))
-    attempt_start_time = time.time()
-    for window in helper.param_range("window", min_params, max_params, param_intervals):
-        window = helper.get_interval_beginning(window, minute)
-        average, stdev, window_sentiments, window_closing_timestamps = process(minute, window, 50, False)
-        print("Window "+str(window)+", Average "+str(average)+", Stdev "+str(stdev))
-        
-        start_time = time.time()
-        for stdevs in helper.param_range("stdevs", min_params, max_params, param_intervals):
-            attempt = {"window": window, "stdevs": stdevs, "average": average, "stdev": stdev, "stdevs": stdevs}#, "delay": delay}
-            attempt.update(trade(average, stdev, window_sentiments, window_closing_timestamps, stdevs, 1.0))
+if __name__ == "__main__":
+    minute = 1000 * 60
+    hour = 60 * minute
+
+    param_intervals = 5
+    min_params = {"window": 5*hour, "buy_stdevs": 0.1, "sell_stdevs": -2.1}
+    max_params = {"window": 45*hour, "buy_stdevs": 2.1, "sell_stdevs": -0.1}
+
+    attempts = [0,0]
+    attempt_batch = 0
+    while len(attempts) > 1:
+        attempts = []
+        attempt_batch += 1
+        print("\nAttempt batch "+str(attempt_batch)+" from "+str(min_params)+" to "+str(max_params))
+        attempt_start_time = time.time()
+        for window in helper.param_range("window", min_params, max_params, param_intervals):
+            window = helper.get_interval_beginning(window, minute)
+            average, stdev, window_sentiments, window_closing_timestamps = process(minute, window, 500, False)
+            print("Window "+str(window)+", Average "+str(average)+", Stdev "+str(stdev))
             
-            attempts.append(attempt)
-            print(attempt)
-
-            #print("Window "+str(window)+", Standard deviations "+str(stdevs)+", Delay "+str(delay))
-            #print("Finished at "+str(coins)+"BTC with a percentage change of "+str(percentage_change)+" after "+str(num_trades)+" trades")
-        print("Time taken "+str(time.time() - start_time)+" at "+str(datetime.now()))
-
-    if len(attempts) > 1:
-        changes = [attempt["change"] for attempt in attempts]
-        average = np.average(changes)
-        print("Average over all", average)
-        stdev = np.std(changes)
-
-        if stdev > 0:
-            print("\nTop attempts") 
-            top_attempts = []
-            for attempt in attempts:
-                if attempt["change"] >= average:
-                    top_attempts.append(attempt)
+            start_time = time.time()
+            for buy_stdevs in helper.param_range("buy_stdevs", min_params, max_params, param_intervals):
+                print("Buy stdevs", buy_stdevs)
+                for sell_stdevs in helper.param_range("sell_stdevs", min_params, max_params, param_intervals):
+                    attempt = {"window": window, "average": average, "stdev": stdev, "buy_stdevs": buy_stdevs, "sell_stdevs": sell_stdevs}
+                    attempt.update(trade(average, stdev, window_sentiments, window_closing_timestamps, 1.0, buy_stdevs, sell_stdevs))
+                    
+                    attempts.append(attempt)
                     print(attempt)
-            attempts = list(top_attempts)
-            #change_argmax = np.argmax([attempt["change"] for attempt in attempts])
+
+                #print("Window "+str(window)+", Standard deviations "+str(stdevs)+", Delay "+str(delay))
+                #print("Finished at "+str(coins)+"BTC with a percentage change of "+str(percentage_change)+" after "+str(num_trades)+" trades")
+            print("Time taken "+str(time.time() - start_time)+" at "+str(datetime.now()))
+
+        if len(attempts) > 1:
             changes = [attempt["change"] for attempt in attempts]
+            average = np.average(changes)
+            print("Average over all", average)
+            stdev = np.std(changes)
 
-            for key in min_params.keys():
-                attempts_key = [attempt[key] for attempt in attempts]
-                stdev = np.std(attempts_key)
-                centre = np.average(attempts_key, weights=changes)
-                print("Key", key, "Centre", centre)
-                #centre = attempts[change_argmax][key] 
-                min_params[key] = centre - stdev
-                max_params[key] = centre + stdev
-        else:
-            attempts = [attempts[0]]
+            if stdev > 0:
+                print("\nTop attempts") 
+                top_attempts = []
+                for attempt in attempts:
+                    if attempt["change"] >= average:
+                        top_attempts.append(attempt)
+                        print(attempt)
+                attempts = list(top_attempts)
+                #change_argmax = np.argmax([attempt["change"] for attempt in attempts])
+                changes = [attempt["change"] for attempt in attempts]
 
-    print("Attempt time taken "+str(time.time() - attempt_start_time)+" at "+str(datetime.now()))
+                for key in min_params.keys():
+                    attempts_key = [attempt[key] for attempt in attempts]
+                    stdev = np.std(attempts_key)
+                    centre = np.average(attempts_key, weights=changes)
+                    print("Key", key, "Centre", centre)
+                    #centre = attempts[change_argmax][key] 
+                    min_params[key] = centre - stdev
+                    max_params[key] = centre + stdev
+            else:
+                attempts = [attempts[0]]
+
+        print("Attempt time taken "+str(time.time() - attempt_start_time)+" at "+str(datetime.now()))
 
 
-print("\nBest attempt")
-store = attempts[0]
-store["timestamp"] = str(helper.timestamp_from_datetime(datetime.now()))
+    print("\nBest attempt")
+    store = attempts[0]
+    store["timestamp"] = str(helper.timestamp_from_datetime(datetime.now()))
 
-params = helper.get_mongodb_collection("params")
-params.insert(store)
-print(store)
+    params = helper.get_mongodb_collection("params")
+    #params.insert(store)
+    print(store)
 
 
 
