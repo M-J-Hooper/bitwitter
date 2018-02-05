@@ -62,8 +62,9 @@ diff = [float(s - min_s)/max_s - float(p - min_p)/max_p for s,p in zip(window_se
 
 print("Plotting")
 fig = plt.figure()
-ax = fig.add_subplot(111)
+ax = fig.add_subplot(2, 1, 1)
 ax2 = ax.twinx()
+ax3 = fig.add_subplot(2, 1, 2)
 
 #for n in range(-1, 2):
 #	value = average + n*stdevs*stdev
@@ -71,9 +72,12 @@ ax2 = ax.twinx()
 #	ax.axhline(y=value,xmin=0,xmax=1,c=color)
 
 #ax.axhline(y=average+buy_stdevs*stdev,xmin=0,xmax=1,c="green")
-#ax.axhline(y=average+sell_stdevs*stdev,xmin=0,xmax=1,c="green")
+#ax2.axhline(y=average+sell_stdevs*stdev,xmin=0,xmax=1,c="green")
+
+ax3.axhline(y=0,xmin=0,xmax=1,c="g")
 
 ax.plot(window_closing_timestamps[0::nth], window_closing_prices[0::nth], "b")
-ax2.plot(window_closing_timestamps[0::nth], diff[0::nth], "r")
+ax2.plot(window_closing_timestamps[0::nth], window_sentiments[0::nth], "r")
+ax3.plot(window_closing_timestamps[0::nth], diff[0::nth], "g")
 
 plt.show()
