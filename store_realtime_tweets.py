@@ -3,6 +3,7 @@ import tweepy
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import helper
 
+logger = helper.init_logger()
 vader = SentimentIntensityAnalyzer()
 tweets = helper.get_mongodb_collection("tweets")
 

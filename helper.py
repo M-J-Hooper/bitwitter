@@ -5,11 +5,18 @@ import decimal
 from pymongo import MongoClient
 from datetime import datetime
 import pickle
+import logging
 
 def get_config():
     with open("conf.json") as conf_json:
         conf = json.load(conf_json)
     return conf
+
+def init_logger():
+    conf = get_config()
+    filename = conf["logging"]["file"]
+    logging.basicConfig(filename=filename, level=logging.INFO, format="%(asctime)s : %(levelname)s : %(module)s : %(message)s", datefmt="%Y-%m-%d %H:%M:%S")  
+    return logging.getLogger()
 
 def get_mongodb_collection(name):
     conf = get_config()
