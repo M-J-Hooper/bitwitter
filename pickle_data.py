@@ -13,7 +13,7 @@ for tweet in tweets.find().sort("timestamp"):
         tweet_data["timestamps"].append(int(tweet["timestamp"]))
         tweet_data["sentiments"].append(tweet["sentiment"])
         count += 1
-helper.save_data(tweet_data, "historical_tweets")
+helper.save_data(tweet_data, "tweets")
 logger.info("Finished pickling {0} tweets".format(count))
 
 logger.info("Started pickling prices")
@@ -24,7 +24,7 @@ for price in prices.find().sort("timestamp"):
     price_data["timestamps"].append(int(price["timestamp"]))
     price_data["prices"].append(price["price"])
     count += 1
-helper.save_data(price_data, "historical_prices")
+helper.save_data(price_data, "prices")
 logger.info("Finished pickling {0} prices".format(count))
 
 
