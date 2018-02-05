@@ -9,7 +9,7 @@ tweets = helper.get_mongodb_collection("tweets")
 
 class StreamListener(tweepy.StreamListener):    
     def on_connect(self):
-        print("Connected to tweet streaming API")
+        logger.info("Stream listener connected to API")
 
     def on_error(self, status_code):
         print("Error " + repr(status_code))
@@ -26,7 +26,7 @@ class StreamListener(tweepy.StreamListener):
                 tweets.insert(store)
                 print(store)
         except Exception as e:
-            print(e)
+            logger.exception("Error processing data")
 
 auth = helper.get_twitter_auth()
 listener = StreamListener(api=tweepy.API(wait_on_rate_limit=True)) 
@@ -38,5 +38,4 @@ while(True):
         print("Focus " + str(conf["words"]))
         streamer.filter(track=conf["words"], languages=["en"])
     except Exception as e:
-        print(e)
-        print("Restarting")
+        logger.exception("Stream listener error")
