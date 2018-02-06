@@ -64,7 +64,6 @@ def get_prices(bulk):
                 for i in range(len(request_timestamps)):
                     store = {"timestamp": str(request_timestamps[i]), "price": float(response[i][4])}
                     prices.insert(store)
-                    print("Stored missing price", response[i][4], "at", helper.str_from_timestamp(request_timestamps[i]))
                     succeded += 1
                 request_timestamps = []
 
@@ -76,5 +75,8 @@ def get_prices(bulk):
     logger.info("Finished collecting {0} prices with {1} skipped and {2} failures".format(succeded, skipped_total, failed))
 
 
-get_prices(False) #Bulk is broken, response is out of order
-
+if __name__ == "__main__":
+    try:
+        get_prices(False) #Bulk is broken, response is out of order
+    except Exception as e:
+        logger.exception("Error getting prices")

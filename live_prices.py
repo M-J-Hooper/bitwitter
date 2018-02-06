@@ -37,17 +37,18 @@ class WebsocketClient(gdax.WebsocketClient):
             logger.exception("Error processing message")
 
     def on_close(self):
-        logger.warning("Websocket client closed after collecting {0} prices".format(self.count))
+        logger.warning("Websocket client closed after {0} prices".format(self.count))
 
 
 logger.info("Started collecting prices")
 gdax_client = WebsocketClient(products="BTC-EUR")
 gdax_client.start()
 
-restart_threshold = 1000 * 30
+conf = helper.get_config()
+timeout = conf["timeout"]["prices"]
 while(True):
     try:
-        if gdax_client.last_message > 0 and helper.timestamp_from_datetime(datetime.now()) - restart_threshold > gdax_client.last_message:
+        if gdax_client.last_message > 0 and helper.timestamp_from_datetime(datetime.now()) - timeout > gdax_client.last_message:
             raise Exception("Inactive websocket client")
         else:
             time.sleep(1)
