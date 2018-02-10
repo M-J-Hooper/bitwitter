@@ -15,7 +15,7 @@ class StreamListener(tweepy.StreamListener):
         self.health_check_count = 10000
         self.health_check_rate = 0.5
         self.timer = helper.timestamp_from_datetime(datetime.now())
-        logger.info("Tweet stream listener connected to twitter API")
+        logger.warning("Tweet stream listener connected to twitter API")
 
     def on_error(self, status_code):
         logger.error("Tweet stream listener error with code {0}".format(status_code))
@@ -30,20 +30,20 @@ class StreamListener(tweepy.StreamListener):
                 sentiment = vader.polarity_scores(text)["compound"]
                 store = {"timestamp": timestamp, "sentiment": sentiment, "text": text}
                 tweets.insert(store)
-                print(store)
+                print(self.count, store)
 
                 self.count += 1
                 if self.count == self.health_check_count:
                     rate = self.health_check_count * 1000 / (int(timestamp) - self.timer)
-                    logger.info("Health check after {0} tweets yields {1} per second".format(self.health_check_count, rate))
+                    logger.info("Health check yields {0} per second".format(rate))
                     if rate < self.health_check_rate:
-                        logger.warning("Rate of {0} per second is lower than healthy threshold of {1}".format(rate, self.health_check_rate))
+                        logger.warning("Unhealthy rate (less than {0} per second)".format(self.health_check_rate))
 
                     self.timer = int(timestamp)
                     self.count = 0
 
         except Exception as e:
-            logger.exception("Error processing tweet")
+            logger.error("Error processing tweet due to {0}".format(str(e)))
 
 
 if __name__ == "__main__":
