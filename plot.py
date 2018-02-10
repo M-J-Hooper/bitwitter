@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 print("Loading pickled data")
-price_data = helper.load_data("historical_prices")
+price_data = helper.load_data("prices")
 price_data["timestamps"] = [int(ts) for ts in price_data["timestamps"]]
-tweet_data = helper.load_data("historical_tweets")
+tweet_data = helper.load_data("tweets")
 tweet_data["timestamps"] = [int(ts) for ts in tweet_data["timestamps"]]
 
 nth = 10
@@ -24,7 +24,7 @@ price_i = 0
 price_timestamp = 0
 
 #window = 122520000
-window = 160320000
+window = 100000000
 stdevs = 0.598364873689
 buy_stdevs = 1.0190376940114
 sell_stdevs = -0.7340228396361
@@ -48,9 +48,12 @@ for i in range(len(tweet_data["timestamps"])):
 
             if price_timestamp == interval_beginning:
                 window_sentiment = np.average(sentiments)
-                window_sentiments.append(window_sentiment)
-                window_closing_timestamps.append(interval_beginning)
-                window_closing_prices.append(price_data["prices"][price_i])
+                if window_sentiment:
+                    window_sentiments.append(window_sentiment)
+                    window_closing_timestamps.append(interval_beginning)
+                    window_closing_prices.append(price_data["prices"][price_i])
+                else:
+                    print(window_sentiment)
 
 average = np.average(window_sentiments)     
 stdev = np.std(window_sentiments)
@@ -58,7 +61,8 @@ stdev = np.std(window_sentiments)
 print("Calculating min/max")
 max_s, min_s = max(window_sentiments), min(window_sentiments)
 max_p, min_p = max(window_closing_prices), min(window_closing_prices)
-diff = [float(s - min_s)/max_s - float(p - min_p)/max_p for s,p in zip(window_sentiments, window_closing_prices)]
+print(min_s, max_s, min_p, max_p)
+diff = [(float(s - min_s)/float(max_s)) - (float(p - min_p)/float(max_p)) for s,p in zip(window_sentiments, window_closing_prices)]
 
 print("Plotting")
 fig = plt.figure()
