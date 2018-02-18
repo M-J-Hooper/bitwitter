@@ -4,7 +4,6 @@ import tweepy
 import decimal
 from pymongo import MongoClient
 from datetime import datetime
-import pickle
 import logging
 
 def get_config():
@@ -12,11 +11,22 @@ def get_config():
         conf = json.load(conf_json)
     return conf
 
-def init_logger():
+def get_logger(name):
     conf = get_config()
     filename = conf["logging"]["file"]
-    logging.basicConfig(filename=filename, level=logging.INFO, format="%(asctime)s : %(levelname)s : %(module)s : %(message)s", datefmt="%Y-%m-%d %H:%M:%S")  
-    return logging.getLogger()
+    formatter = logging.Formatter("%(asctime)s : %(levelname)s : %(module)s : %(message)s", "%Y-%m-%d %H:%M:%S")
+    
+    fh = logging.FileHandler(filename)
+    fh.setFormatter(formatter)
+   
+    sh = logging.StreamHandler()
+    sh.setFormatter(formatter)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    logger.addHandler(fh)
+    logger.addHandler(sh)
+    return logger
 
 def get_mongodb_collection(name):
     conf = get_config()
@@ -66,13 +76,6 @@ def param_range(param_name, min_params, max_params, param_intervals):
                 yield float(x)
                 x += decimal.Decimal(str(jump))
 
-def save_data(obj, name):
-    with open(name + ".pkl", "wb") as f:
-        pickle.dump(obj, f, pickle.HIGHEST_PROTOCOL)
-
-def load_data(name):
-    with open(name + ".pkl", "rb") as f:
-        return pickle.load(f)
 
 
 

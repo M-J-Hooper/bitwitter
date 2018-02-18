@@ -1,4 +1,0 @@
-* * * * * cd ~/bitwitter; pgrep -f "python3 live_tweets.py" || python3 live_tweets.py
-0 0 * * * cd ~/bitwitter; python3 get_prices.py &
-0 0 * * * cd ~/bitwitter; python3 pickle_data.py &
-
