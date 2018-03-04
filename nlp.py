@@ -54,10 +54,10 @@ def preprocess_text(text):
     return " ".join(text.strip().split())
 
 def get_sentence_vectors(model, sentence):
-    return [model[word] for word in sentence.split()]
+    return [model[word] for word in sentence.split() if word in model.vocab]
 
 def get_sentence_weights(model, sentence):
-    return [zipf_weight(model, word) for word in sentence.split()]
+    return [zipf_weight(model, word) for word in sentence.split() if word in model.vocab]
 
 def zipf_weight(model, word):
     count = model.vocab[word].count

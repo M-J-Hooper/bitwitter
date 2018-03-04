@@ -1,0 +1,6 @@
+0 19 * * * cd ~/Stuff/bitwitter; scp -i ~/.ssh/Bitwitter.pem ubuntu@ec2-35-177-175-249.eu-west-2.compute.amazonaws.com:~/bitwitter/tweets.word2vec.model ~/Stuff/bitwitter/
+0 19 * * * cd ~/Stuff/bitwitter; scp -i ~/.ssh/Bitwitter.pem ubuntu@ec2-35-177-175-249.eu-west-2.compute.amazonaws.com:~/bitwitter/.gitignore ~/Stuff/bitwitter/
+0 19 * * * cd ~/Stuff/bitwitter; scp -i ~/.ssh/Bitwitter.pem ubuntu@ec2-35-177-175-249.eu-west-2.compute.amazonaws.com:~/bitwitter/conf.json ~/Stuff/bitwitter/
+0 19 * * * cd ~/Stuff/bitwitter; scp -ri ~/.ssh/Bitwitter.pem ubuntu@ec2-35-177-175-249.eu-west-2.compute.amazonaws.com:~/bitwitter/dump ~/Stuff/bitwitter/
+0 20 * * * cd ~/Stuff/bitwitter; mongo bitwitter --eval "db.dropDatabase()" && mongorestore dump
+

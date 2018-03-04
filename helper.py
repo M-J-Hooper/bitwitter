@@ -77,9 +77,3 @@ def param_range(param_name, min_params, max_params, param_intervals):
                 x += decimal.Decimal(str(jump))
 
 
-
-
-
-
-
-
