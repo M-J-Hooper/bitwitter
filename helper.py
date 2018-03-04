@@ -35,12 +35,6 @@ def get_mongodb_collection(name):
     db = client[conf["mongo"]["db"]]
     return db[name]
 
-def get_twitter_auth():
-    conf = get_config()
-    auth = tweepy.OAuthHandler(conf["auth"]["consumer_key"], conf["auth"]["consumer_secret"])
-    auth.set_access_token(conf["auth"]["access_token"], conf["auth"]["access_token_secret"])
-    return auth
-
 def str_from_timestamp(timestamp):
     return datetime.fromtimestamp(timestamp / 1000.0).strftime("%Y-%m-%d %H:%M:%S")
 

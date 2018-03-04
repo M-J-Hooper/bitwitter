@@ -1,4 +1,3 @@
 * * * * * cd ~/bitwitter; ps aux | grep -v "grep" | grep "live_tweets.py" || python3 live_tweets.py
-0 0 * * * cd ~/bitwitter; python3 get_prices.py && python3 pickle_data.py && python3 words.py
-0 0 */5 * * cd ~/bitwitter; mongodump 
+0 3 * * * cd ~/bitwitter; python3 get_prices.py && mongodump && python3 nlp.py
 
