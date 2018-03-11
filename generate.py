@@ -41,10 +41,10 @@ def window_vectors(interval, window, start=0, end=10000000000000, min_data_point
                     yield interval_beginning, np.average(vectors, axis=0, weights=weights)
 
 
-def window_vectors_with_future_price_change(interval, window, label_future, start=0, end=10000000000000, min_data_points=500):
+def window_vectors_with_future_price_change(interval, window, future, start=0, end=10000000000000, min_data_points=500):
     for timestamp, vector in window_vectors(interval, window, start, end, min_data_points):
         price_entry_now = prices.find_one({"timestamp": timestamp})
-        price_entry_future = prices.find_one({"timestamp": (timestamp + label_future)})
+        price_entry_future = prices.find_one({"timestamp": (timestamp + future)})
         if price_entry_now != None and price_entry_future != None:
             price_now = price_entry_now["price"]
             price_future = price_entry_future["price"]
