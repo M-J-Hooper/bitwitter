@@ -39,9 +39,10 @@ def generate_model():
         logger.exception("Error generating embeddings")
 
 def preprocess_text(text):
+    #TODO: problems with underscores at start of words (USERNAME???)
     text = text.lower()
     
-    text = re.sub(r"(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([A-Za-z]+[A-Za-z0-9]+)", " USERNAME ", text)      #replace usernames with token
+    text = re.sub(r"(?<=^|(?<=[^a-z0-9-_\.]))@([a-z]+[a-z0-9]+)", " USERNAME ", text)      #replace usernames with token
     text = re.sub(r"\b[\w]+@[\w]+\.[\w]+\b", " EMAIL ", text)                                       #replace usernames with token
     
     text = re.sub(r"\'", "", text)                                                                  #keep apostrophe words together

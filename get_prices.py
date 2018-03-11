@@ -43,7 +43,7 @@ def get_prices(interval, product, bulk=False):
             
             if response != None:
                 for i in range(len(response)):
-                    response_timestamp = str(response[i][0] * 1000)
+                    response_timestamp = int(response[i][0]) * 1000
                     price = float(response[i][4])
                     volume = float(response[i][5])
                     store = {"timestamp": response_timestamp, "price": price, "volume": volume}
