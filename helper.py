@@ -46,28 +46,5 @@ def timestamp_from_datetime(dt):
     return int(float(dt.strftime("%s.%f")) * 1000)
 
 def get_interval_beginning(timestamp, interval):
-    return int(math.floor(int(timestamp) / float(interval))) * interval
-
-def param_range(param_name, min_params, max_params, param_intervals):
-    x = min_params[param_name]
-    y = max_params[param_name]
-    jump = (y - x) / (param_intervals - 1)
-    
-    is_int = isinstance(x, int)
-    if is_int:
-        jump = int(jump)
-    else:
-        x = decimal.Decimal(str(x))
-    
-    if jump == 0:
-        yield x
-    else:
-        while x <= y:
-            if is_int:
-                yield x
-                x += jump
-            else:
-                yield float(x)
-                x += decimal.Decimal(str(jump))
-
+    return int(math.floor(timestamp / float(interval))) * interval
 
