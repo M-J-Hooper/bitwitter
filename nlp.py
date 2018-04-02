@@ -1,5 +1,6 @@
 import helper
 import re
+import numpy as np
 from gensim.models import Word2Vec, KeyedVectors
 
 logger = helper.get_logger("nlp")
@@ -55,7 +56,7 @@ def preprocess_text(text):
     return " ".join(text.strip().split())
 
 def get_sentence_vectors(model, sentence):
-    return [model[word] for word in sentence.split() if word in model.vocab]
+    return [np.array(model[word]) for word in sentence.split() if word in model.vocab]
 
 def get_sentence_weights(model, sentence):
     return [zipf_weight(model, word) for word in sentence.split() if word in model.vocab]

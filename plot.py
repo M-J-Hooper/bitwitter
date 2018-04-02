@@ -114,8 +114,8 @@ if __name__ == "__main__":
     if profile:
         pr.enable()
 
-    plot_timeline(3*hour, 3*day)
-    #plot_window_vectors(day, 7*day)
+    #plot_timeline(3*hour, 3*day)
+    plot_window_vectors(day, 7*day)
     #plot_word_embedding(True, 0.01)
     
     if profile:

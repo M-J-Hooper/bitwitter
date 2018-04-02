@@ -13,6 +13,10 @@ def window_vectors(interval, window, start=0, end=10000000000000, min_data_point
     lengths = deque()
     vectors = deque()
     weights = deque()
+    new_interval_vectors = []
+    new_interval_weights = []
+    window_vector = np.zeros(shape=(model.vector_size))
+    weight_sum = 0
     start_generating = False
     for tweet in tweets.find({"timestamp": {"$gt": start, "$lt": end}}).sort("timestamp"):
         if "http" not in tweet["text"]:
@@ -23,33 +27,63 @@ def window_vectors(interval, window, start=0, end=10000000000000, min_data_point
 
             vectors.extend(sentence_vectors)
             weights.extend(sentence_weights)
+            new_interval_vectors.extend(sentence_vectors)
+            new_interval_weights.extend(sentence_weights)
             lengths.append(len(sentence_vectors))
 
             new_interval_beginning = helper.get_interval_beginning(tweet["timestamp"], interval)
             if new_interval_beginning > interval_beginning:
                 interval_beginning = new_interval_beginning
+
+                subtract_vector = np.zeros(shape=(model.vector_size))
+                subtract_weight = 0
                 while len(timestamps) and timestamps[0] + window <= interval_beginning:
                     if not start_generating:
                         start_generating = True
                     timestamps.popleft()
                     length = lengths.popleft()
                     for i in range(length):
-                        vectors.popleft()
-                        weights.popleft()
+                        popped_weight = weights.popleft()
+                        subtract_weight += popped_weight
+                        subtract_vector += popped_weight * vectors.popleft()
                 
+                window_vector = (window_vector * weight_sum) - subtract_vector
+                weight_sum -= subtract_weight
+                for i in range(len(new_interval_weights)):
+                    weight_sum += new_interval_weights[i]
+                    window_vector += new_interval_weights[i] * new_interval_vectors[i]
+                window_vector = window_vector / weight_sum
+                new_interval_vectors = []
+                new_interval_weights = []
+
                 if start_generating and len(timestamps) >= min_data_points:
-                    yield interval_beginning, np.average(vectors, axis=0, weights=weights)
+                    yield interval_beginning, window_vector
 
 
-def window_vectors_with_future_price_change(interval, window, future, start=0, end=10000000000000, min_data_points=500):
+def window_vectors_with_price(interval, window, future, start=0, end=10000000000000, min_data_points=500):
     for timestamp, vector in window_vectors(interval, window, start, end, min_data_points):
-        price_entry_now = prices.find_one({"timestamp": timestamp})
-        price_entry_future = prices.find_one({"timestamp": (timestamp + future)})
-        if price_entry_now != None and price_entry_future != None:
-            price_now = price_entry_now["price"]
-            price_future = price_entry_future["price"]
-            change = (price_now - price_future) / price_now
-            yield vector, change
+        price_entry = prices.find_one({"timestamp": timestamp})
+        if price_entry != None:
+            yield timestamp, vector, price_entry["price"]
+
+
+def window_vectors_for_training(interval, window, future, start=0, end=10000000000000, min_data_points=500):
+    while(True):
+        window_vector_generator = window_vectors(interval, window, start, end, min_data_points)
+        for timestamp, vector in window_vector_generator:
+            price_entry_now = prices.find_one({"timestamp": timestamp})
+            price_entry_future = prices.find_one({"timestamp": (timestamp + future)})
+            if price_entry_now != None and price_entry_future != None:
+                price_now = price_entry_now["price"]
+                price_future = price_entry_future["price"]
+
+                #limit = 0.1
+                #change = (price_now - price_future) / price_now
+                #label = max(min(limit, change), -limit) / limit
+
+                label = 1 if price_future > price_now else 0
+                #print(helper.str_from_timestamp(timestamp), label)
+                yield np.array([vector]), np.array([label])
 
 
 def window_sentiments(interval, window, start=0, end=10000000000000, min_data_points=500):
