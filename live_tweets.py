@@ -17,7 +17,7 @@ class StreamListener(tweepy.StreamListener):
         self.failed = 0
         self.sentiment_sum = 0
         self.health_check_count = 50000
-        self.health_check_rate = 1
+        self.health_check_rate = 0.1
         self.health_check_failure_percent = 1
         self.timer = helper.timestamp_from_datetime(datetime.now())
         logger.info("Tweet stream listener connected to twitter API")
@@ -33,7 +33,7 @@ class StreamListener(tweepy.StreamListener):
             text = tweet["text"]
             timestamp = int(tweet["timestamp_ms"])
             
-            if not tweet["retweeted"] and "RT @" not in text:
+            if not tweet["retweeted"] and "RT @" not in text and "http" not in text:
                 sentiment = vader.polarity_scores(text)["compound"]
                 self.sentiment_sum += sentiment
 
@@ -43,7 +43,7 @@ class StreamListener(tweepy.StreamListener):
                 self.succeded += 1
             
             if self.count == self.health_check_count:
-                sentiment_avg = self.sentiment_sum / self.count
+                sentiment_avg = self.sentiment_sum / self.succeded
                 rate = self.count * 1000 / (timestamp - self.timer)
                 success_percent = self.succeded * 100 / self.count
                 failure_percent = self.failed * 100 / self.count
