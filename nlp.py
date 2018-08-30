@@ -27,12 +27,12 @@ class SentenceIterable(object):
                 yield preprocess_text(tweet["text"]).split()
 
 
-def generate_model():
+def generate_model(size):
     try:
         logger.info("Started generating embeddings")
         sentences = SentenceIterable()
         
-        model = Word2Vec(sentences)
+        model = Word2Vec(sentences, size=size)
 
         save_model(model)
         logger.info("Finished generating embeddings with a vocabulary of {0} words".format(len(model.wv.vocab)))
@@ -68,4 +68,4 @@ def zipf_weight(model, word):
 
 
 if __name__ == "__main__":
-    generate_model()
+    generate_model(20)
