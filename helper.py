@@ -1,6 +1,5 @@
 import json
 import math
-import tweepy
 import decimal
 from pymongo import MongoClient
 from datetime import datetime

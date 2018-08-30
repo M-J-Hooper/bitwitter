@@ -17,7 +17,7 @@ def plot_timeline(interval, window, min_data_points=500):
     print("Calculating window stats")
     window_sentiments = []
     window_prices = []       
-    for timestamp, sentiment, price in generate.window_sentiments_with_price(interval, window, 1518024388000):
+    for timestamp, sentiment, price in generate.window_sentiments_with_price(interval, window):
         print(helper.str_from_timestamp(timestamp), price, sentiment)
         window_sentiments.append(sentiment)                    
         window_prices.append(price)                    
@@ -42,7 +42,7 @@ def plot_timeline(interval, window, min_data_points=500):
 
     plt.show()
 
-def plot_window_vectors(interval, window, use_tsne=False):
+def plot_window_vectors(interval, window, pairs=False, use_tsne=False):
     print("Calculating window vectors")
     window_vectors = []
     for timestamp, vector in generate.window_vectors(interval, window):
@@ -50,7 +50,6 @@ def plot_window_vectors(interval, window, use_tsne=False):
         window_vectors.append(vector)
     
     print("Plotting")
-    pairs = False
     width = 4
     fig, axs = plt.subplots(width, width)
     axs = axs.ravel()
@@ -70,7 +69,7 @@ def plot_window_vectors(interval, window, use_tsne=False):
             if pairs:
                 axs[i].scatter(vector[subplot_pairs[i][0]], vector[subplot_pairs[i][1]], color=c)
             else:
-                axs[i].scatter(l, vector[subplot_pairs[i][1]], color=c)
+                axs[i].scatter(l, vector[subplot_pairs[i][0]], color=c)
         if first:
             first = False
 
